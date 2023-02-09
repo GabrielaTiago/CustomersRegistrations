@@ -4,8 +4,9 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "dev": "nodemon ./src/server.ts",
-    "start": "node ./src/server.js"
+    "build": "tsc",
+    "dev": "NODE_ENV=dev nodemon ./src/server.ts",
+    "start": "node ./dist/server.js"
   },
   "keywords": [],
   "author": "",
