@@ -1,17 +1,27 @@
-import { wrongSchemaError } from '../errors/serverErrors';
+import { conflictError, wrongSchemaError } from '../errors/serverErrors';
 import { ICustomer } from '../interfaces/customerInterface';
 import * as customerRepositories from '../repositories/customerRepository';
 
 export async function createCustomer(customer: ICustomer) {
     const { cpf } = customer;
+    const formattedCPF = formatCpfToDB(cpf);
+    const cpfExits = await customerRepositories.getCustomerByCPF(formattedCPF);
 
-    verifyCustomerCPF(cpf);
+    if (cpfExits.rowCount > 0) {
+        throw conflictError('Customer already registered');
+    }
 
-    await customerRepositories.createCustomer(customer);
+    verifyCustomerCPF(formattedCPF);
+
+    await customerRepositories.createCustomer({ ...customer, cpf: formattedCPF });
+}
+
+function formatCpfToDB(cpf: string) {
+    return cpf.replace(/[.-]/g, '');
 }
 
 function verifyCustomerCPF(cpf: string) {
-    const formattedCPF = formatCPF(cpf);
+    const formattedCPF = formatCpfToValidations(cpf);
 
     const isValid = verifyFirstDigit(formattedCPF);
 
@@ -22,11 +32,8 @@ function verifyCustomerCPF(cpf: string) {
     }
 }
 
-function formatCPF(cpf: string) {
-    return cpf
-        .replace(/[.-]/g, '')
-        .split('')
-        .map((value) => parseInt(value));
+function formatCpfToValidations(cpf: string) {
+    return cpf.split('').map((value) => parseInt(value));
 }
 
 function verifyFirstDigit(cpf: number[]) {
