@@ -21,12 +21,8 @@ export async function getCustomerByCPF(cpf: string) {
 export async function createCustomer(customer: ICustomer) {
     const { cpf, birth_date } = customer;
     const formattedCPF = formatCpfToDB(cpf);
-    const cpfExits = await customerRepositories.getCustomerByCPF(formattedCPF);
 
-    if (cpfExits.rowCount > 0) {
-        throw conflictError('Customer already registered');
-    }
-
+    await checksCustomerExistence(formattedCPF);
     verifyCustomerCPF(formattedCPF);
     verifyBithDate(birth_date);
 
@@ -35,6 +31,12 @@ export async function createCustomer(customer: ICustomer) {
 
 function formatCpfToDB(cpf: string) {
     return cpf.replace(/[.-]/g, '');
+}
+
+async function checksCustomerExistence(cpf: string) {
+    const { rowCount } = await customerRepositories.getCustomerByCPF(cpf);
+
+    if (rowCount > 0) throw conflictError('Customer already registered');
 }
 
 function verifyCustomerCPF(cpf: string) {
