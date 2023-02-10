@@ -13,6 +13,6 @@ export async function getCustomerByCPF(cpf: string) {
 }
 
 export async function getAllCutomers() {
-    const costumers: QueryResult<ICustomer[]> = await databaseConnection.query('SELECT * FROM users');
+    const costumers: QueryResult<ICustomer> = await databaseConnection.query('SELECT * FROM users');
     return costumers;
 }
