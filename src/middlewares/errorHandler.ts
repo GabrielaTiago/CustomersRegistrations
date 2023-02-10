@@ -6,5 +6,6 @@ export function errorHandler(err: Error | IServerError, req: Request, res: Respo
     if (isAppError(err)) {
         return res.status(errorTypesStatusCode(err.type)).send(err.message);
     }
+    console.error(err);
     return res.sendStatus(500);
 }

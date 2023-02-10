@@ -11,7 +11,8 @@ export async function getAllCutomers() {
 }
 
 export async function getCustomerByCPF(cpf: string) {
-    const { rows: customer, rowCount } = await customerRepositories.getCustomerByCPF(cpf);
+    const formattedCPF = formatCpfToDB(cpf);
+    const { rows: customer, rowCount } = await customerRepositories.getCustomerByCPF(formattedCPF);
 
     if (rowCount === 0) throw notFoundError('This customer was not found');
 
@@ -21,12 +22,8 @@ export async function getCustomerByCPF(cpf: string) {
 export async function createCustomer(customer: ICustomer) {
     const { cpf, birth_date } = customer;
     const formattedCPF = formatCpfToDB(cpf);
-    const cpfExits = await customerRepositories.getCustomerByCPF(formattedCPF);
 
-    if (cpfExits.rowCount > 0) {
-        throw conflictError('Customer already registered');
-    }
-
+    await checksCustomerExistence(formattedCPF);
     verifyCustomerCPF(formattedCPF);
     verifyBithDate(birth_date);
 
@@ -35,6 +32,12 @@ export async function createCustomer(customer: ICustomer) {
 
 function formatCpfToDB(cpf: string) {
     return cpf.replace(/[.-]/g, '');
+}
+
+async function checksCustomerExistence(cpf: string) {
+    const { rowCount } = await customerRepositories.getCustomerByCPF(cpf);
+
+    if (rowCount > 0) throw conflictError('Customer already registered');
 }
 
 function verifyCustomerCPF(cpf: string) {
@@ -75,7 +78,12 @@ function verifySecondDigit(cpf: number[]) {
     }
 }
 
-function checksFinalDigitsOfTheCpf(cpf: number[], sequenceOfDigits: number, digitToBeVerified: number, maximumWeightForValidation: number) {
+function checksFinalDigitsOfTheCpf(
+    cpf: number[],
+    sequenceOfDigits: number,
+    digitToBeVerified: number,
+    maximumWeightForValidation: number
+) {
     const OFFICIAL_CPF_SIZE: number = 11;
     let validDigit: number;
     let sum: number = 0;
