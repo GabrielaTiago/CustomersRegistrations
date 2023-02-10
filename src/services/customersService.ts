@@ -11,7 +11,8 @@ export async function getAllCutomers() {
 }
 
 export async function getCustomerByCPF(cpf: string) {
-    const { rows: customer, rowCount } = await customerRepositories.getCustomerByCPF(cpf);
+    const formattedCPF = formatCpfToDB(cpf);
+    const { rows: customer, rowCount } = await customerRepositories.getCustomerByCPF(formattedCPF);
 
     if (rowCount === 0) throw notFoundError('This customer was not found');
 
@@ -77,7 +78,12 @@ function verifySecondDigit(cpf: number[]) {
     }
 }
 
-function checksFinalDigitsOfTheCpf(cpf: number[], sequenceOfDigits: number, digitToBeVerified: number, maximumWeightForValidation: number) {
+function checksFinalDigitsOfTheCpf(
+    cpf: number[],
+    sequenceOfDigits: number,
+    digitToBeVerified: number,
+    maximumWeightForValidation: number
+) {
     const OFFICIAL_CPF_SIZE: number = 11;
     let validDigit: number;
     let sum: number = 0;
