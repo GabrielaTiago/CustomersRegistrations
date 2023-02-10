@@ -3,7 +3,7 @@ import { ICustomer } from '../interfaces/customerInterface';
 import * as customerRepositories from '../repositories/customerRepository';
 
 export async function createCustomer(customer: ICustomer) {
-    const { cpf } = customer;
+    const { cpf, birth_date } = customer;
     const formattedCPF = formatCpfToDB(cpf);
     const cpfExits = await customerRepositories.getCustomerByCPF(formattedCPF);
 
@@ -12,6 +12,7 @@ export async function createCustomer(customer: ICustomer) {
     }
 
     verifyCustomerCPF(formattedCPF);
+    verifyBithDate(birth_date);
 
     await customerRepositories.createCustomer({ ...customer, cpf: formattedCPF });
 }
@@ -76,4 +77,11 @@ function checksFinalDigitsOfTheCpf(cpf: number[], sequenceOfDigits: number, digi
 
     if (validDigit === digitToBeVerified) return true;
     return false;
+}
+
+function verifyBithDate(birth_date: string) {
+    const today = new Date();
+    const birthday = new Date(birth_date.split('/').reverse().join('-') + ' 00:00:00');
+
+    if (birthday > today) throw wrongSchemaError("Date invalid - date of birth greater than today's date");
 }
