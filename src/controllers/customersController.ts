@@ -13,5 +13,14 @@ export async function createCustomer(req: Request, res: Response) {
 
 export async function getAllCutomers(req: Request, res: Response) {
     const costumers = await customerServices.getAllCutomers();
+    
     res.status(200).send(costumers);
+}
+
+export async function getCustomerByCPF(req: Request, res: Response) {
+    const { cpf } = req.params;
+
+    const costumer = await customerServices.getCustomerByCPF(cpf);
+
+    res.status(200).send(costumer);
 }

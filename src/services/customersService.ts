@@ -6,8 +6,16 @@ export async function getAllCutomers() {
     const { rows: costumers } = await customerRepositories.getAllCutomers();
 
     if (costumers.length === 0) throw notFoundError('No customers were found');
-    
+
     return costumers;
+}
+
+export async function getCustomerByCPF(cpf: string) {
+    const { rows: customer, rowCount } = await customerRepositories.getCustomerByCPF(cpf);
+
+    if (rowCount === 0) throw notFoundError('This customer was not found');
+
+    return customer;
 }
 
 export async function createCustomer(customer: ICustomer) {
