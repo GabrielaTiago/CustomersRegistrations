@@ -11,3 +11,8 @@ export async function getCustomerByCPF(cpf: string) {
     const customer: QueryResult<ICustomer> = await databaseConnection.query('SELECT * FROM users WHERE cpf = $1', [cpf]);
     return customer;
 }
+
+export async function getAllCutomers() {
+    const costumers: QueryResult<ICustomer[]> = await databaseConnection.query('SELECT * FROM users');
+    return costumers;
+}

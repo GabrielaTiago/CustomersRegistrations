@@ -1,6 +1,14 @@
-import { conflictError, wrongSchemaError } from '../errors/serverErrors';
+import { conflictError, notFoundError, wrongSchemaError } from '../errors/serverErrors';
 import { ICustomer } from '../interfaces/customerInterface';
 import * as customerRepositories from '../repositories/customerRepository';
+
+export async function getAllCutomers() {
+    const { rows: costumers } = await customerRepositories.getAllCutomers();
+
+    if (costumers.length === 0) throw notFoundError('No customers were found');
+    
+    return costumers;
+}
 
 export async function createCustomer(customer: ICustomer) {
     const { cpf, birth_date } = customer;

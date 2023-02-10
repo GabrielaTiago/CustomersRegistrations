@@ -10,3 +10,8 @@ export async function createCustomer(req: Request, res: Response) {
 
     res.status(201).send('Customer successfully created.');
 }
+
+export async function getAllCutomers(req: Request, res: Response) {
+    const costumers = await customerServices.getAllCutomers();
+    res.status(200).send(costumers);
+}
