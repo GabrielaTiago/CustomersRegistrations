@@ -112,8 +112,15 @@ function checksFinalDigitsOfTheCpf(
 function verifyBirthDate(birth_date: string) {
     const today = new Date();
     const birthday = new Date(birth_date.split('/').reverse().join('-') + ' 00:00:00');
+    const dateRegex = /^([0-2]\d|(3)[0-1])(\/)(((0)\d)|((1)[0-2]))(\/)\d{4}$/;
 
-    if (birthday > today) throw wrongSchemaError("Date invalid - date of birth greater than today's date");
+    if (!dateRegex.test(birth_date)) {
+        throw wrongSchemaError('Does not correspond to a valid date format: MM/DD/YYYY');
+    }
+
+    if (birthday > today) {
+        throw wrongSchemaError("Date invalid - date of birth greater than today's date");
+    }
 }
 
 export const customerService = {
