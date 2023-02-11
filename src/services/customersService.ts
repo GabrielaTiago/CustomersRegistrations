@@ -1,33 +1,33 @@
 import { conflictError, notFoundError, wrongSchemaError } from '../errors/serverErrors';
 import { ICustomer } from '../interfaces/customerInterface';
-import * as customerRepositories from '../repositories/customerRepository';
+import { customerRepository } from '../repositories/customerRepository';
 
-export async function getAllCutomers() {
-    const { rows: costumers } = await customerRepositories.getAllCutomers();
+async function getAllCutomers() {
+    const { rows: costumers } = await customerRepository.getAllCutomers();
 
     if (costumers.length === 0) throw notFoundError('No customers were found');
 
     return costumers;
 }
 
-export async function getCustomerByCPF(cpf: string) {
+async function getCustomerByCPF(cpf: string) {
     const formattedCPF = formatCpfToDB(cpf);
-    const { rows: customer, rowCount } = await customerRepositories.getCustomerByCPF(formattedCPF);
+    const { rows: customer, rowCount } = await customerRepository.getCustomerByCPF(formattedCPF);
 
     if (rowCount === 0) throw notFoundError('This customer was not found');
 
     return customer;
 }
 
-export async function createCustomer(customer: ICustomer) {
+async function createCustomer(customer: ICustomer) {
     const { cpf, birth_date } = customer;
     const formattedCPF = formatCpfToDB(cpf);
 
     await checksCustomerExistence(formattedCPF);
     verifyCustomerCPF(formattedCPF);
-    verifyBithDate(birth_date);
+    verifyBirthDate(birth_date);
 
-    await customerRepositories.createCustomer({ ...customer, cpf: formattedCPF });
+    await customerRepository.createCustomer({ ...customer, cpf: formattedCPF });
 }
 
 function formatCpfToDB(cpf: string) {
@@ -35,7 +35,7 @@ function formatCpfToDB(cpf: string) {
 }
 
 async function checksCustomerExistence(cpf: string) {
-    const { rowCount } = await customerRepositories.getCustomerByCPF(cpf);
+    const { rowCount } = await customerRepository.getCustomerByCPF(cpf);
 
     if (rowCount > 0) throw conflictError('Customer already registered');
 }
@@ -53,7 +53,13 @@ function verifyCustomerCPF(cpf: string) {
 }
 
 function formatCpfToValidations(cpf: string) {
-    return cpf.split('').map((value) => parseInt(value));
+    const cpfRegex = /^((\d{3}.\d{3}.\d{3}-\d{2})|(\d{11}))$/;
+
+    if (!cpfRegex.test(cpf)) {
+        throw wrongSchemaError('Does not match a valid cpf format: ###.###.###-## or 00000000000');
+    }
+
+    return cpf.split('').map((value) => Number(value));
 }
 
 function verifyFirstDigit(cpf: number[]) {
@@ -103,9 +109,23 @@ function checksFinalDigitsOfTheCpf(
     return false;
 }
 
-function verifyBithDate(birth_date: string) {
+function verifyBirthDate(birth_date: string) {
     const today = new Date();
     const birthday = new Date(birth_date.split('/').reverse().join('-') + ' 00:00:00');
 
     if (birthday > today) throw wrongSchemaError("Date invalid - date of birth greater than today's date");
 }
+
+export const customerService = {
+    getAllCutomers,
+    getCustomerByCPF,
+    createCustomer,
+    formatCpfToDB,
+    checksCustomerExistence,
+    verifyCustomerCPF,
+    formatCpfToValidations,
+    verifyFirstDigit,
+    verifySecondDigit,
+    checksFinalDigitsOfTheCpf,
+    verifyBirthDate,
+};
