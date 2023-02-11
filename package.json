@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "build": "tsc",
+    "pre:build": "rm -rf dist",
+    "build": "tsc --p ./tsconfig.build.json",
     "dev": "NODE_ENV=dev nodemon ./src/server.ts",
     "start": "node ./dist/server.js"
   },
