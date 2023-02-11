@@ -1,8 +1,9 @@
 import { QueryResult } from 'pg';
-import { conflictError, wrongSchemaError } from '../../errors/serverErrors';
+import { conflictError, notFoundError, wrongSchemaError } from '../../errors/serverErrors';
 import { customerService } from '../customersService';
 import { customerRepository } from '../../repositories/customerRepository';
 import { ICustomer } from '../../interfaces/customerInterface';
+import { not } from 'joi';
 
 describe('Customer Services', () => {
     beforeEach(() => {
@@ -175,6 +176,45 @@ describe('Customer Services', () => {
         it('should not throw error if birth date is less than today', () => {
             const oldDate = '01/01/2000';
             expect(() => customerService.verifyBirthDate(oldDate)).not.toThrowError();
+        });
+    });
+
+    describe('Search a customer by his cpf', () => {
+        it('Should return the customer corresponding to the cpf', async () => {
+            const cpf: string = '57445653023';
+
+            jest.spyOn(customerRepository, 'getCustomerByCPF').mockImplementationOnce(
+                async () =>
+                    ({
+                        rowCount: 1,
+                        rows: [{ id: 1, name: 'Aranbor Tievia', cpf: '57445653023', birth_date: '0090-01-14T03:06:28.000Z' }],
+                    } as QueryResult<any>)
+            );
+
+            const result = await customerService.getCustomerByCPF(cpf);
+            const resultCPF = result[0].cpf;
+
+            expect(customerRepository.getCustomerByCPF).toHaveBeenCalledWith(cpf);
+            expect(result).toHaveLength(1);
+            expect(cpf).toEqual(resultCPF);
+        });
+        it('Should throw the "not found" error when no match is found for the cpf', async () => {
+            const cpf: string = '09778516057';
+
+            jest.spyOn(customerRepository, 'getCustomerByCPF').mockImplementationOnce(async () => ({ rowCount: 0 } as QueryResult<any>));
+
+            await expect(customerService.getCustomerByCPF(cpf)).rejects.toEqual(notFoundError('This customer was not found'));
+            expect(customerRepository.getCustomerByCPF).toHaveBeenCalledWith(cpf);
+        });
+        it('should send a schema error when cpf does not match the regex pattern', async () => {
+            const cpf = '097785sksoko57';
+
+            jest.spyOn(customerRepository, 'getCustomerByCPF').mockImplementationOnce(async () => ({ rowCount: 0 } as QueryResult<any>));
+
+            await expect(customerService.getCustomerByCPF(cpf)).rejects.toEqual(
+                wrongSchemaError('Does not match a valid cpf format: ###.###.###-## or 00000000000')
+            );
+            expect(customerRepository.getCustomerByCPF).not.toHaveBeenCalledWith(cpf);
         });
     });
 });
