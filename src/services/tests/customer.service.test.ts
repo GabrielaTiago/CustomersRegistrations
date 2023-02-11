@@ -141,4 +141,25 @@ describe('Customer Services', () => {
             expect(customerRepository.getCustomerByCPF).toBeCalled();
         });
     });
+
+    describe('Verify CPF', () => {
+        it('should let it pass when it is a valid CPF', () => {
+            const cpf = '57567244004';
+
+            expect(() => customerService.verifyCustomerCPF(cpf)).not.toThrow();
+        });
+
+        describe('Does not have valid verification digits', () => {
+            it('should not pass when the first digit is not valid', () => {
+                const cpf = '47717718069';
+
+                expect(() => customerService.verifyCustomerCPF(cpf)).toThrowError('Invalid CPF');
+            });
+            it('should not pass when the second digit is not valid', () => {
+                const cpf = '47476204008';
+
+                expect(() => customerService.verifyCustomerCPF(cpf)).toThrowError('Invalid CPF');
+            });
+        });
+    });
 });
