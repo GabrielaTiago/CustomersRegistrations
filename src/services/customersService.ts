@@ -31,6 +31,12 @@ async function createCustomer(customer: ICustomer) {
 }
 
 function formatCpfToDB(cpf: string) {
+    const cpfRegex = /^((\d{3}.\d{3}.\d{3}-\d{2})|(\d{11}))$/;
+
+    if (!cpfRegex.test(cpf)) {
+        throw wrongSchemaError('Does not match a valid cpf format: ###.###.###-## or 00000000000');
+    }
+    
     return cpf.replace(/[.-]/g, '');
 }
 
