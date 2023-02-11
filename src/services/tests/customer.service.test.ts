@@ -69,6 +69,7 @@ describe('Customer Services', () => {
             });
         });
     });
+
     describe('Formatting the CPF to the database', () => {
         it('should remove "." and "-" from CPF', () => {
             const cpf = '293.320.980-26';
@@ -90,6 +91,7 @@ describe('Customer Services', () => {
             expect(result).toHaveLength(11);
         });
     });
+
     describe('Formatting the CPF to validations', () => {
         it('should throw a error when the CPF string has letters', () => {
             const cpf = '474762040AA';
@@ -106,6 +108,37 @@ describe('Customer Services', () => {
 
             expect(result).toEqual(desiredFormat);
             expect(result).toHaveLength(11);
+        });
+    });
+
+    describe('Customer existence', () => {
+        it('should throw a conflict error when the user exists', async () => {
+            const cpf = '57445653023';
+            const result: QueryResult<ICustomer> = {
+                rows: [{ name: 'John Doe', cpf: '57445653023', birth_date: '27/08/1990' }],
+                rowCount: 1,
+                command: '',
+                oid: 0,
+                fields: [],
+            };
+            jest.spyOn(customerRepository, 'getCustomerByCPF').mockResolvedValueOnce(result);
+
+            await expect(customerService.checksCustomerExistence(cpf)).rejects.toEqual(conflictError('Customer already registered'));
+            expect(customerRepository.getCustomerByCPF).toBeCalled();
+        });
+        it('should not throw a conflict error when the user does not exists', async () => {
+            const cpf = '34443421017';
+            const result: QueryResult<ICustomer> = {
+                rows: [],
+                rowCount: 0,
+                command: '',
+                oid: 0,
+                fields: [],
+            };
+            jest.spyOn(customerRepository, 'getCustomerByCPF').mockResolvedValueOnce(result);
+
+            await expect(customerService.checksCustomerExistence(cpf)).resolves.not.toThrowError();
+            expect(customerRepository.getCustomerByCPF).toBeCalled();
         });
     });
 });
