@@ -69,4 +69,43 @@ describe('Customer Services', () => {
             });
         });
     });
+    describe('Formatting the CPF to the database', () => {
+        it('should remove "." and "-" from CPF', () => {
+            const cpf = '293.320.980-26';
+            const desiredFormat = '29332098026';
+
+            const result = customerService.formatCpfToDB(cpf);
+
+            expect(result).toEqual(desiredFormat);
+            expect(result).toHaveLength(11);
+        });
+
+        it('should keep the original characters', () => {
+            const cpf = '17408935061';
+            const desiredFormat = '17408935061';
+
+            const result = customerService.formatCpfToDB(cpf);
+
+            expect(result).toEqual(desiredFormat);
+            expect(result).toHaveLength(11);
+        });
+    });
+    describe('Formatting the CPF to validations', () => {
+        it('should throw a error when the CPF string has letters', () => {
+            const cpf = '474762040AA';
+
+            expect(() => customerService.verifyCustomerCPF(cpf)).toThrowError(
+                'Does not match a valid cpf format: ###.###.###-## or 00000000000'
+            );
+        });
+        it('should transform the characters of the CPF into an array of numbers', () => {
+            const cpf = '12345678900';
+            const desiredFormat = [1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 0];
+
+            const result = customerService.formatCpfToValidations(cpf);
+
+            expect(result).toEqual(desiredFormat);
+            expect(result).toHaveLength(11);
+        });
+    });
 });
