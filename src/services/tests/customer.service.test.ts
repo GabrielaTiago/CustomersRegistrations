@@ -162,4 +162,19 @@ describe('Customer Services', () => {
             });
         });
     });
+
+    describe('Verification of date of birth', () => {
+        it('Should throw an error if there are any characters that are not numeric', () => {
+            const today = '$$/0&/test';
+            expect(() => customerService.verifyBirthDate(today)).toThrowError('Does not correspond to a valid date format: MM/DD/YYYY');
+        });
+        it('should throw error if birth date is greater than today', () => {
+            const today = '12/05/2050';
+            expect(() => customerService.verifyBirthDate(today)).toThrowError("Date invalid - date of birth greater than today's date");
+        });
+        it('should not throw error if birth date is less than today', () => {
+            const oldDate = '01/01/2000';
+            expect(() => customerService.verifyBirthDate(oldDate)).not.toThrowError();
+        });
+    });
 });
