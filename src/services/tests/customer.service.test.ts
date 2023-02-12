@@ -216,4 +216,187 @@ describe('Customer Services', () => {
             expect(customerRepository.getCustomerByCPF).not.toHaveBeenCalledWith(cpf);
         });
     });
+
+    describe('Search all customers', () => {
+        it('should return the customers given the query params', async () => {
+            const page: number = 2;
+            const limit: number = 8;
+            const customers = [
+                {
+                    id: 95,
+                    name: 'João da Silva',
+                    cpf: '12345678910',
+                    birth_date: '1980-01-01T03:00:00.000Z',
+                },
+                {
+                    id: 96,
+                    name: 'Maria Oliveira',
+                    cpf: '12345678911',
+                    birth_date: '1982-02-02T03:00:00.000Z',
+                },
+                {
+                    id: 97,
+                    name: 'Pedro Almeida',
+                    cpf: '12345678912',
+                    birth_date: '1983-03-03T03:00:00.000Z',
+                },
+                {
+                    id: 98,
+                    name: 'Larissa Martins',
+                    cpf: '12345678920',
+                    birth_date: '1991-11-11T02:00:00.000Z',
+                },
+                {
+                    id: 99,
+                    name: 'Gustavo Souza',
+                    cpf: '12345678921',
+                    birth_date: '1992-12-12T02:00:00.000Z',
+                },
+                {
+                    id: 100,
+                    name: 'Juliana Oliveira',
+                    cpf: '12345678922',
+                    birth_date: '1993-01-13T02:00:00.000Z',
+                },
+                {
+                    id: 101,
+                    name: 'Gabriel Silva',
+                    cpf: '12345678923',
+                    birth_date: '1994-02-14T02:00:00.000Z',
+                },
+                {
+                    id: 102,
+                    name: 'Luana Almeida',
+                    cpf: '12345678924',
+                    birth_date: '1995-03-15T03:00:00.000Z',
+                },
+            ];
+
+            jest.spyOn(customerRepository, 'getAllCustomers').mockResolvedValueOnce(customers);
+
+            const result = await customerService.getAllCustomers(page, limit);
+            const size = result.length;
+
+            expect(customerRepository.getAllCustomers).toHaveBeenCalledWith(page, limit);
+            expect(size).toBeLessThanOrEqual(limit);
+        });
+        it('should return the customers given the default values for the query params', async () => {
+            const page: number = 1;
+            const limit: number = 10;
+            const customers = [
+                {
+                    id: 103,
+                    name: 'João da Silva',
+                    cpf: '12345678910',
+                    birth_date: '1980-01-01T03:00:00.000Z',
+                },
+                {
+                    id: 104,
+                    name: 'Maria Oliveira',
+                    cpf: '12345678911',
+                    birth_date: '1982-02-02T03:00:00.000Z',
+                },
+                {
+                    id: 105,
+                    name: 'Pedro Almeida',
+                    cpf: '12345678912',
+                    birth_date: '1983-03-03T03:00:00.000Z',
+                },
+            ];
+
+            jest.spyOn(customerRepository, 'getAllCustomers').mockResolvedValueOnce(customers);
+
+            const result = await customerService.getAllCustomers(page, limit);
+            const size = result.length;
+
+            expect(customerRepository.getAllCustomers).toHaveBeenCalledWith(page, limit);
+            expect(size).toBeLessThanOrEqual(limit);
+        });
+        it('should return the respectives customers given a large limit', async () => {
+            const page: number = 1;
+            const limit: number = 3942901;
+            const customers = [
+                {
+                    id: 106,
+                    name: 'Ana Paula',
+                    cpf: '12345678913',
+                    birth_date: '1984-04-04T03:00:00.000Z',
+                },
+                {
+                    id: 107,
+                    name: 'Rafaela Souza',
+                    cpf: '12345678914',
+                    birth_date: '1985-05-05T03:00:00.000Z',
+                },
+                {
+                    id: 108,
+                    name: 'Lucas Freitas',
+                    cpf: '12345678915',
+                    birth_date: '1986-06-06T03:00:00.000Z',
+                },
+            ];
+
+            jest.spyOn(customerRepository, 'getAllCustomers').mockResolvedValueOnce(customers);
+
+            const result = await customerService.getAllCustomers(page, limit);
+            const size = result.length;
+
+            expect(customerRepository.getAllCustomers).toHaveBeenCalledWith(page, limit);
+            expect(size).toBeLessThanOrEqual(limit);
+        });
+        it('should throw an error when the page value has no content', async () => {
+            const page: number = 1932084;
+            const limit: number = 10;
+
+            jest.spyOn(customerRepository, 'getAllCustomers').mockResolvedValueOnce([]);
+
+            await expect(customerService.getAllCustomers(page, limit)).rejects.toEqual(notFoundError('No customers were found'));
+            expect(customerRepository.getAllCustomers).toHaveBeenCalledWith(page, limit);
+        });
+        it('should throw an error when has no customers registered', async () => {
+            const page: number = 1;
+            const limit: number = 10;
+
+            jest.spyOn(customerRepository, 'getAllCustomers').mockResolvedValueOnce([]);
+
+            await expect(customerService.getAllCustomers(page, limit)).rejects.toEqual(notFoundError('No customers were found'));
+            expect(customerRepository.getAllCustomers).toHaveBeenCalledWith(page, limit);
+        });
+    });
+
+    describe('Validation for the query params', () => {
+        it('should throw an error when the page e limit numbers are less than zero', () => {
+            const page = -2;
+            const limit = -7;
+
+            jest.spyOn(customerRepository, 'getAllCustomers').mockResolvedValueOnce([]);
+
+            expect(() => customerService.validatesQueryParams(page, limit)).toThrow('Invalid parameters');
+            expect(customerRepository.getAllCustomers).not.toBeCalled();
+        });
+        it('should throw an error when the page number is less than zero', () => {
+            const page = -5;
+            const limit = 9;
+
+            jest.spyOn(customerRepository, 'getAllCustomers').mockResolvedValueOnce([]);
+
+            expect(() => customerService.validatesQueryParams(page, limit)).toThrowError('Invalid page');
+            expect(customerRepository.getAllCustomers).not.toBeCalled();
+        });
+        it('should throw an error when the limit number is less than zero', () => {
+            const page = 3;
+            const limit = -4;
+
+            jest.spyOn(customerRepository, 'getAllCustomers').mockResolvedValueOnce([]);
+
+            expect(() => customerService.validatesQueryParams(page, limit)).toThrowError('Invalid limit');
+            expect(customerRepository.getAllCustomers).not.toBeCalled();
+        });
+        it('should not throw an error when page and limit numbers are valid', () => {
+            const page = 6;
+            const limit = 8;
+
+            expect(() => customerService.validatesQueryParams(page, limit)).not.toThrowError('Invalid parameters');
+        });
+    });
 });

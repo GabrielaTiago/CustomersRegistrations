@@ -1,6 +1,6 @@
 import { QueryResult } from 'pg';
 import { databaseConnection } from '../database/postgres';
-import { ICustomer } from '../interfaces/customerInterface';
+import { ICustomer, IExtendedCustomer } from '../interfaces/customerInterface';
 
 async function createCustomer(customer: ICustomer) {
     const { name, cpf, birth_date } = customer;
@@ -8,17 +8,18 @@ async function createCustomer(customer: ICustomer) {
 }
 
 async function getCustomerByCPF(cpf: string) {
-    const customer: QueryResult<ICustomer> = await databaseConnection.query('SELECT * FROM users WHERE cpf = $1', [cpf]);
+    const customer: QueryResult<IExtendedCustomer> = await databaseConnection.query('SELECT * FROM users WHERE cpf = $1', [cpf]);
     return customer;
 }
 
-async function getAllCutomers() {
-    const costumers: QueryResult<ICustomer> = await databaseConnection.query('SELECT * FROM users');
-    return costumers;
+async function getAllCustomers(page: number, limit: number) {
+    const offset = (page - 1) * limit;
+    const customers: QueryResult<IExtendedCustomer> = await databaseConnection.query('SELECT * FROM users LIMIT $1 OFFSET $2', [limit, offset]);
+    return customers.rows;
 }
 
 export const customerRepository = {
     createCustomer,
     getCustomerByCPF,
-    getAllCutomers
+    getAllCustomers,
 };
