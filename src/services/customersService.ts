@@ -2,12 +2,12 @@ import { conflictError, notFoundError, wrongSchemaError } from '../errors/server
 import { ICustomer } from '../interfaces/customerInterface';
 import { customerRepository } from '../repositories/customerRepository';
 
-async function getAllCutomers() {
-    const { rows: costumers } = await customerRepository.getAllCutomers();
+async function getAllCustomers(page: number, limit: number) {
+  const { rows: customers } = await customerRepository.getAllCustomers(page, limit);
 
-    if (costumers.length === 0) throw notFoundError('No customers were found');
+  if (customers.length === 0) throw notFoundError('No customers were found');
 
-    return costumers;
+  return customers;
 }
 
 async function getCustomerByCPF(cpf: string) {
@@ -130,7 +130,7 @@ function verifyBirthDate(birth_date: string) {
 }
 
 export const customerService = {
-    getAllCutomers,
+    getAllCustomers,
     getCustomerByCPF,
     createCustomer,
     formatCpfToDB,

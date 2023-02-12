@@ -1,9 +1,8 @@
 import { QueryResult } from 'pg';
-import { conflictError, notFoundError, wrongSchemaError } from '../../errors/serverErrors';
 import { customerService } from '../customersService';
+import { conflictError, notFoundError, wrongSchemaError } from '../../errors/serverErrors';
 import { customerRepository } from '../../repositories/customerRepository';
-import { ICustomer } from '../../interfaces/customerInterface';
-import { not } from 'joi';
+import { IExtendedCustomer } from '../../interfaces/customerInterface';
 
 describe('Customer Services', () => {
     beforeEach(() => {
@@ -115,8 +114,8 @@ describe('Customer Services', () => {
     describe('Customer existence', () => {
         it('should throw a conflict error when the user exists', async () => {
             const cpf = '57445653023';
-            const result: QueryResult<ICustomer> = {
-                rows: [{ name: 'John Doe', cpf: '57445653023', birth_date: '27/08/1990' }],
+            const result: QueryResult<IExtendedCustomer> = {
+                rows: [{ id: 24, name: 'John Doe', cpf: '57445653023', birth_date: '27/08/1990' }],
                 rowCount: 1,
                 command: '',
                 oid: 0,
@@ -129,7 +128,7 @@ describe('Customer Services', () => {
         });
         it('should not throw a conflict error when the user does not exists', async () => {
             const cpf = '34443421017';
-            const result: QueryResult<ICustomer> = {
+            const result: QueryResult<IExtendedCustomer> = {
                 rows: [],
                 rowCount: 0,
                 command: '',
