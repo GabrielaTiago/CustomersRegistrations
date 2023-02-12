@@ -3,11 +3,12 @@ import { ICustomer } from '../interfaces/customerInterface';
 import { customerRepository } from '../repositories/customerRepository';
 
 async function getAllCustomers(page: number, limit: number) {
-  const { rows: customers } = await customerRepository.getAllCustomers(page, limit);
+    validatesQueryParams(page, limit);
+    const customers = await customerRepository.getAllCustomers(page, limit);
 
-  if (customers.length === 0) throw notFoundError('No customers were found');
+    if (customers.length === 0) throw notFoundError('No customers were found');
 
-  return customers;
+    return customers;
 }
 
 async function getCustomerByCPF(cpf: string) {
@@ -36,7 +37,7 @@ function formatCpfToDB(cpf: string) {
     if (!cpfRegex.test(cpf)) {
         throw wrongSchemaError('Does not match a valid cpf format: ###.###.###-## or 00000000000');
     }
-    
+
     return cpf.replace(/[.-]/g, '');
 }
 
@@ -129,6 +130,12 @@ function verifyBirthDate(birth_date: string) {
     }
 }
 
+function validatesQueryParams(page: number, limit: number) {
+    if (page < 0 && limit < 0) throw wrongSchemaError('Invalid parameters');
+    if (page < 0) throw wrongSchemaError('Invalid page');
+    if (limit < 0) throw wrongSchemaError('Invalid limit');
+}
+
 export const customerService = {
     getAllCustomers,
     getCustomerByCPF,
@@ -141,4 +148,5 @@ export const customerService = {
     verifySecondDigit,
     checksFinalDigitsOfTheCpf,
     verifyBirthDate,
+    validatesQueryParams,
 };

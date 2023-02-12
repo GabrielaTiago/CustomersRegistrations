@@ -3,3 +3,7 @@ export interface ICustomer {
     cpf: string;
     birth_date: string;
 }
+
+export interface IExtendedCustomer extends ICustomer {
+    id: number;
+}

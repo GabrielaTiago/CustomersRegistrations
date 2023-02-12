@@ -11,10 +11,13 @@ export async function createCustomer(req: Request, res: Response) {
     res.status(201).send('Customer successfully created.');
 }
 
-export async function getAllCutomers(req: Request, res: Response) {
-    const costumers = await customerService.getAllCutomers();
+export async function getAllCustomers(req: Request, res: Response) {
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
 
-    res.status(200).send(costumers);
+    const customers = await customerService.getAllCustomers(page, limit);
+
+    res.status(200).send(customers);
 }
 
 export async function getCustomerByCPF(req: Request, res: Response) {
