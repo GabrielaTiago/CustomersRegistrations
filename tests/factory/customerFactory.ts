@@ -79,3 +79,21 @@ export function __invalidBirthDateTodaysDate() {
 
     return birth_date.substring(0, birth_date.length - 4) + year;
 }
+
+export function __randomNumber() {
+    return chance.integer({ min: 0, max: 3 });
+}
+
+export function __randomLargeNumber() {
+    const number1 = chance.integer({ min: 100 });
+    const number2 = chance.integer({ min: 2, max: 9 });
+    return number1 * number2;
+}
+
+export function __randomNegativeNumber() {
+    return chance.integer({ max: -1 });
+}
+
+export function __string() {
+    return chance.string();
+}
